@@ -124,8 +124,8 @@ def run_from_cli():
         # Trying to see if two files are a match
         dicom_file = dicom.read_file(sys.argv[1])
         raw_file = tifffile.TiffFile(sys.argv[2])
-        _check_match(dicom_file, raw_file)
+        check_result = _check_match(dicom_file, raw_file)
+        print(check_result)
 
-        print('Not implemented yet!')
     else:
         print('match-dicom takes exactly TWO input arguments! ')
