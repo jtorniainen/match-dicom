@@ -40,7 +40,7 @@ def _find_matching_files(dicom_file, raw_dir):
                 if target_time == _get_raw_timestamp(raw_file):
                     matches.append(raw_filename)
             except ValueError:
-                print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_file))
+                print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
     return matches
 
 
