@@ -55,9 +55,10 @@ def read_dicom_comments(path):
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
             _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
     else:
-        dicom_comment = _get_dicom_comment(path)
-        dicom_timestamp = _get_dicom_timestamp(path)
-        _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
+        dicom_file = dicom.read_file(path)
+        dicom_comment = _get_dicom_comment(dicom_file)
+        dicom_timestamp = _get_dicom_timestamp(dicom_file)
+        _print_dicom(path, dicom_comment, dicom_timestamp)
 
 
 def match_timestamp(directory, target):
