@@ -38,6 +38,7 @@ def _find_matching_files(dicom_file, raw_dir):
             try:
                 raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
                 if target_time == _get_raw_timestamp(raw_file):
+                    print(term.green_bold('Found: ') + '{} is a match'.format(raw_filename))
                     matches.append(raw_filename)
             except ValueError:
                 print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
@@ -45,7 +46,12 @@ def _find_matching_files(dicom_file, raw_dir):
 
 
 def match_directories(dicom_dir, raw_dir):
-    pass
+    matches = {}
+    dicom_filenames = os.listdir(dicom_dir)
+    for dicom_filename in dicom_filenames:
+        dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename))
+        matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
+    return matches
 
 
 def _get_dicom_comment(dicom_file):
@@ -124,8 +130,7 @@ def run_from_cli():
 
         elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
             dicom_file = dicom.read_file(sys.argv[1])
-            matches = _find_matching_files(dicom_file, sys.argv[2])
-            print(matches)
+            _find_matching_files(dicom_file, sys.argv[2])
 
         else:  # both inputs are files
             dicom_file = dicom.read_file(sys.argv[1])
@@ -133,8 +138,8 @@ def run_from_cli():
             check_result = _check_match(dicom_file, raw_file)
 
             if check_result:
-                print(term.green_bold('**MATCH**'))
+                print(term.green_bold('Match found'))
             else:
-                print(term.yellow('NO-MATCH'))
+                print(term.red_bold('No match found'))
     else:
         print('match-dicom takes exactly TWO input arguments! ')
