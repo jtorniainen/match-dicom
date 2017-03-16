@@ -62,15 +62,25 @@ def read_dicom_comments(path):
     if os.path.isdir(path):
         dicom_filenames = os.listdir(path)
         for dicom_filename in dicom_filenames:
-            dicom_file = dicom.read_file(os.path.join(path, dicom_filename))
+            try:
+                dicom_file = dicom.read_file(os.path.join(path, dicom_filename))
+                dicom_comment = _get_dicom_comment(dicom_file)
+                dicom_timestamp = _get_dicom_timestamp(dicom_file)
+                _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
+
+            except dicom.errors.InvalidDicomError:
+                print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(dicom_filename))
+                continue
+
+    else:
+        try:
+            dicom_file = dicom.read_file(path)
             dicom_comment = _get_dicom_comment(dicom_file)
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
-            _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
-    else:
-        dicom_file = dicom.read_file(path)
-        dicom_comment = _get_dicom_comment(dicom_file)
-        dicom_timestamp = _get_dicom_timestamp(dicom_file)
-        _print_dicom(path, dicom_comment, dicom_timestamp)
+            _print_dicom(path, dicom_comment, dicom_timestamp)
+
+        except dicom.errors.InvalidDicomError:
+            print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
 
 
 def match_timestamp(directory, target):
