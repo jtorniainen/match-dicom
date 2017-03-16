@@ -26,21 +26,24 @@ def _get_dicom_comment(dicom_file):
 
 
 def _get_dicom_timestamp(dicom_file):
-    datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
-                                              dicom_file.AcquisitionDate[4:6],
-                                              dicom_file.AcquisitionDate[6:8],
-                                              dicom_file.AcquisitionTime[0:2],
-                                              dicom_file.AcquisitionTime[2:4],
-                                              dicom_file.AcquisitionTime[4:6])
+    if hasattr(dicom_file, 'AcquisitionDate'):
+        datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
+                                                  dicom_file.AcquisitionDate[4:6],
+                                                  dicom_file.AcquisitionDate[6:8],
+                                                  dicom_file.AcquisitionTime[0:2],
+                                                  dicom_file.AcquisitionTime[2:4],
+                                                  dicom_file.AcquisitionTime[4:6])
 
+    else:
+        datetime_str = None
     return datetime_str
 
 
 def _print_dicom(filename, comment, timestamp):
     """ Pretty print the indentifiers of a DICOM file """
     dicom_str = (filename.ljust(20) +
-                 term.magenta_bold(comment).ljust(20) +
-                 term.yellow(timestamp).rjust(30))
+                 term.magenta_bold(comment).ljust(30) +
+                 term.yellow(timestamp).rjust(40))
     print(dicom_str)
 
 
