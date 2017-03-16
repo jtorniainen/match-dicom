@@ -123,7 +123,7 @@ def read_dicom_comments(path):
 
 
 def print_matching_files(matches):
-    for key, value in matches.items:
+    for key, value in matches.items():
         print(term.bold_yellow(key) + '-> {}'.format(key, value))
 
 
