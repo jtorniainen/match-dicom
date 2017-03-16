@@ -28,16 +28,24 @@ def _check_match(dicom_file, raw_file):
     return timestamp_dicom == timestamp_raw
 
 
-def _find_matching_files(dicom_file, raw_dir):
+def _find_matching_files(dicom_file, raw_dir, verbose=False):
     raw_filenames = os.listdir(raw_dir)
     target_time = _get_dicom_timestamp(dicom_file)
     matches = []
     for raw_filename in raw_filenames:
             try:
                 raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
-                if target_time == _get_raw_timestamp(raw_file):
+                raw_timestamp = _get_raw_timestamp(raw_file)
+
+                if verbose:
+                    print(term.yellow_bold('Checking: ') + '{} vs. {} ({})'.format(target_time,
+                                                                                   raw_timestamp,
+                                                                                   raw_filename))
+
+                if target_time == raw_timestamp:
                     print(term.green_bold('Found: ') + '{} is a match'.format(raw_filename))
                     matches.append(raw_filename)
+
             except ValueError:
                 print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
     return matches
@@ -137,7 +145,7 @@ def run_from_cli():
 
         elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
             dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
-            _find_matching_files(dicom_file, sys.argv[2])
+            _find_matching_files(dicom_file, sys.argv[2], verbose=True)
 
         else:  # both inputs are files
             dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
