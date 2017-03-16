@@ -18,16 +18,6 @@ import blessings
 
 term = blessings.Terminal()
 
-# def match_timestamp(directory, target):
-    # for f in os.listdir(directory):
-        # if f.endswith('.oct'):
-            # tfile = tifffile.TiffFile(os.path.join(directory, f))
-            # timestamp = tfile.pages[0].tags['datetime'].value.decode('ascii')
-            # if timestamp == target:
-                # print(term.green_bold('{} = {}\t'.format(target, timestamp)) + f)
-            # else:
-                # print('{} ≠ {}'.format(target, timestamp))
-
 
 def _get_raw_timestamp(raw_file):
     """ Returns the timestamp of the raw file """
@@ -41,7 +31,14 @@ def _check_match(dicom_file, raw_file):
 
 
 def _find_matching_files(dicom_file, raw_dir):
-    pass
+    raw_filenames = os.listdir(raw_dir)
+    target_time = _get_dicom_timestamp(dicom_file)
+    matches = []
+    for raw_filename in raw_filenames:
+            raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
+            if target_time == _get_raw_timestamp(raw_file):
+                matches.append(raw_filename)
+    return matches
 
 
 def match_directories(dicom_dir, raw_dir):
@@ -114,18 +111,27 @@ def read_dicom_comments(path):
 
 
 def run_from_cli():
-    if len(sys.argv) == 2:  # Single file -> attempt to read and display DICOM comment
-        try:
-            read_dicom_comments(sys.argv[1])
-        except dicom.errors.InvalidDicomError:  # FIXME wrong place to catch this
-            print('{} appears not to be a DICOM-file.'.format(sys.argv[1]))
+    if len(sys.argv) == 2:  # Single file
+        read_dicom_comments(sys.argv[1])
 
-    elif len(sys.argv) == 3:  # Two files -> see which case
-        # Trying to see if two files are a match
-        dicom_file = dicom.read_file(sys.argv[1])
-        raw_file = tifffile.TiffFile(sys.argv[2])
-        check_result = _check_match(dicom_file, raw_file)
-        print(check_result)
+    elif len(sys.argv) == 3:  # Two files
 
+        if os.path.isdir(sys.argv[1]) and os.path.isdir(sys.argv[2]):  # both dirs
+            print('Not yet implemented')
+
+        elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
+            dicom_file = dicom.read_file(sys.argv[1])
+            matches = _find_matching_files(dicom_file, sys.argv[2])
+            print(matches)
+
+        else:  # both inputs are files
+            dicom_file = dicom.read_file(sys.argv[1])
+            raw_file = tifffile.TiffFile(sys.argv[2])
+            check_result = _check_match(dicom_file, raw_file)
+
+            if check_result:
+                print(term.green_bold('**MATCH**'))
+            else:
+                print(term.yellow('NO-MATCH'))
     else:
         print('match-dicom takes exactly TWO input arguments! ')
