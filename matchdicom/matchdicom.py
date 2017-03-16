@@ -41,6 +41,13 @@ def _get_dicom_timestamp(dicom_file):
 
 def _print_dicom(filename, comment, timestamp):
     """ Pretty print the indentifiers of a DICOM file """
+
+    if not comment:
+        comment = '<None>'
+
+    if not timestamp:
+        timestamp = '<None>'
+
     dicom_str = (filename.ljust(20) +
                  term.magenta_bold(comment).ljust(30) +
                  term.yellow(timestamp).rjust(40))
