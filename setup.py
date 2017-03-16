@@ -13,4 +13,4 @@ setup(name='match-dicom',
                         'pydicom>=0.9.9',
                         'tifffile>=0.10.0'],
       entry_points={"console_scripts":
-                    ["mdicom = matchdicom.matchdicom:run_from_cli"]})
+                    ["match-dicom = matchdicom.matchdicom:run_from_cli"]})

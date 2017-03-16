@@ -2,6 +2,7 @@
 
 import dicom
 import os
+import sys
 import argparse
 import tifffile
 import blessings
@@ -61,7 +62,12 @@ def read_timestamp(filename):
 
 
 def run_from_cli():
-    print('Hello!')
+    if len(sys.argv) == 2:  # Single file -> attempt to read and display DICOM comment
+        print(read_comment(sys.argv[1]))
+    elif len(sys.argv) == 3:  # Two files -> see which case
+        print('Not implemented yet!')
+    else:
+        print('match-dicom takes exactly TWO input arguments! ')
 
 
 if __name__ == '__main__':
