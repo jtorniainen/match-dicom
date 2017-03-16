@@ -49,8 +49,12 @@ def match_directories(dicom_dir, raw_dir):
     matches = {}
     dicom_filenames = os.listdir(dicom_dir)
     for dicom_filename in dicom_filenames:
-        dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename))
-        matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
+        try:
+            dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename))
+            matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
+        except dicom.errors.InvalidDicomError:
+            print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).rjust(20))
+            continue
     return matches
 
 
