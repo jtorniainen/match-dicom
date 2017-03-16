@@ -111,7 +111,6 @@ def read_dicom_comments(path):
             except dicom.errors.InvalidDicomError:
                 print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).rjust(20))
                 continue
-
     else:
         try:
             dicom_file = dicom.read_file(path)
@@ -123,6 +122,11 @@ def read_dicom_comments(path):
             print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
 
 
+def print_matching_files(matches):
+    for key, value in matches.items:
+        print(term.bold_yellow(key) + '-> {}'.format(key, value))
+
+
 def run_from_cli():
     if len(sys.argv) == 2:  # Single file
         read_dicom_comments(sys.argv[1])
@@ -131,6 +135,7 @@ def run_from_cli():
 
         if os.path.isdir(sys.argv[1]) and os.path.isdir(sys.argv[2]):  # both dirs
             matches = match_directories(sys.argv[1], sys.argv[2])
+            print_matching_files(matches)
 
         elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
             dicom_file = dicom.read_file(sys.argv[1])
