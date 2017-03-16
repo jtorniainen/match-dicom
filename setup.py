@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='match-dicom',
+setup(name='matchdicom',
       version='0.1',
       description='Simple, command-line DICOM-RAW matcher',
       author='jtorniainen, Biophysics of Bone and Cartilage, Department of Applied Physics, University of Eastern Finland',

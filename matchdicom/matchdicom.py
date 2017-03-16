@@ -3,7 +3,7 @@
 import dicom
 import os
 import sys
-import argparse
+# import argparse
 import tifffile
 import blessings
 
@@ -18,24 +18,24 @@ import blessings
 term = blessings.Terminal()
 
 
-def read_comment(dicom_filename):
+def read_dicom_comment(dicom_file):
     """ Returns the contents of the comment field of a dicom file. """
-    dicom_data = dicom.read_file(dicom_filename)
-    if hasattr(dicom_data, 'ImageComments'):
-        return dicom_data.ImageComments
+    if hasattr(dicom_file, 'ImageComments'):
+        return dicom_file.ImageComments
     else:
         return None
 
 
-def read_comments(path):
+def read_dicom_comments(path):
     """ Reads comments from all files found in path """
 
     if os.path.isdir(path):
         dicom_filenames = os.listdir(path)
         for dicom_filename in dicom_filenames:
-            print(read_comment(os.path.join(path, dicom_filename)))
+            dicom_file = dicom.read_file(os.path.join(path, dicom_filename))
+            print(read_dicom_comment(dicom_file))
     else:
-        print(read_comment(path))
+        print(read_dicom_comment(dicom.read_file(path)))
 
 
 def match_timestamp(directory, target):
@@ -49,31 +49,35 @@ def match_timestamp(directory, target):
                 print('{} ≠ {}'.format(target, timestamp))
 
 
-def read_timestamp(filename):
-    dfile = dicom.read_file(filename)
-    datetime_str = '{}:{}:{} {}:{}:{}'.format(dfile.AcquisitionDate[0:4],
-                                              dfile.AcquisitionDate[4:6],
-                                              dfile.AcquisitionDate[6:8],
-                                              dfile.AcquisitionTime[0:2],
-                                              dfile.AcquisitionTime[2:4],
-                                              dfile.AcquisitionTime[4:6])
+def read_dicom_timestamp(dicom_file):
+    datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
+                                              dicom_file.AcquisitionDate[4:6],
+                                              dicom_file.AcquisitionDate[6:8],
+                                              dicom_file.AcquisitionTime[0:2],
+                                              dicom_file.AcquisitionTime[2:4],
+                                              dicom_file.AcquisitionTime[4:6])
 
     return datetime_str
 
 
 def run_from_cli():
     if len(sys.argv) == 2:  # Single file -> attempt to read and display DICOM comment
-        print(read_comment(sys.argv[1]))
+        try:
+            dicom_file = dicom.read_file(sys.argv[1])
+            print(read_dicom_comment(dicom_file))
+        except dicom.errors.InvalidDicomError:
+            print('{} appears not to be a DICOM-file.')
+
     elif len(sys.argv) == 3:  # Two files -> see which case
         print('Not implemented yet!')
     else:
         print('match-dicom takes exactly TWO input arguments! ')
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('dicom', help='path to a DICOM file')
-    parser.add_argument('directory', help='path to RAW files')
-    args = parser.parse_args()
-    timestamp = read_timestamp(args.dicom)
-    match_timestamp(args.directory, timestamp)
+# if __name__ == '__main__':
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('dicom', help='path to a DICOM file')
+    # parser.add_argument('directory', help='path to RAW files')
+    # args = parser.parse_args()
+    # timestamp = read_timestamp(args.dicom)
+    # match_timestamp(args.directory, timestamp)
