@@ -35,9 +35,12 @@ def _find_matching_files(dicom_file, raw_dir):
     target_time = _get_dicom_timestamp(dicom_file)
     matches = []
     for raw_filename in raw_filenames:
-            raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
-            if target_time == _get_raw_timestamp(raw_file):
-                matches.append(raw_filename)
+            try:
+                raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
+                if target_time == _get_raw_timestamp(raw_file):
+                    matches.append(raw_filename)
+            except ValueError:
+                print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_file))
     return matches
 
 
