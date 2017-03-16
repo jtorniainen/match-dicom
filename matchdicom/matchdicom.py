@@ -126,7 +126,7 @@ def run_from_cli():
     elif len(sys.argv) == 3:  # Two files
 
         if os.path.isdir(sys.argv[1]) and os.path.isdir(sys.argv[2]):  # both dirs
-            print('Not yet implemented')
+            matches = match_directories(sys.argv[1], sys.argv[2])
 
         elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
             dicom_file = dicom.read_file(sys.argv[1])
