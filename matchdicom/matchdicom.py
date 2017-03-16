@@ -49,8 +49,8 @@ def _print_dicom(filename, comment, timestamp):
         timestamp = '<None>'
 
     dicom_str = (filename.ljust(20) +
-                 term.magenta_bold(comment).ljust(30) +
-                 term.yellow(timestamp).ljust(40))
+                 term.magenta_bold(comment).ljust(60) +
+                 term.yellow(timestamp).ljust(80))
     print(dicom_str)
 
 
