@@ -50,12 +50,14 @@ def _print_dicom(filename, comment, timestamp):
 
     dicom_str = (filename.ljust(20) +
                  term.magenta_bold(comment).ljust(30) +
-                 term.yellow(timestamp).rjust(40))
+                 term.yellow(timestamp).ljust(40))
     print(dicom_str)
 
 
 def read_dicom_comments(path):
     """ Reads comments from all files found in path """
+
+    print('FILE'.ljust(20) + 'COMMENT'.ljust(30) + 'TIME'.ljust(40))
 
     if os.path.isdir(path):
         dicom_filenames = os.listdir(path)
