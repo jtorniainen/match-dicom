@@ -14,8 +14,6 @@ import blessings
 # jtorniainen
 # UEF 2017, MIT License
 
-# TODO: Super slow right now because DICOM files are read completely just for meta information
-
 term = blessings.Terminal()
 
 
@@ -124,7 +122,7 @@ def read_dicom_comments(path):
 
 def print_matching_files(matches):
     for key, value in matches.items():
-        print(term.bold_yellow(key) + '-> {}'.format(key, value))
+        print(term.bold_yellow(key).ljust(40) + ' -> ' + term.green(str(value)))
 
 
 def run_from_cli():
