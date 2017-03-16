@@ -50,7 +50,7 @@ def match_directories(dicom_dir, raw_dir):
     dicom_filenames = os.listdir(dicom_dir)
     for dicom_filename in dicom_filenames:
         try:
-            dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename))
+            dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename), stop_before_pixels=True)
             matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).rjust(20))
@@ -103,7 +103,7 @@ def read_dicom_comments(path):
         dicom_filenames = os.listdir(path)
         for dicom_filename in dicom_filenames:
             try:
-                dicom_file = dicom.read_file(os.path.join(path, dicom_filename))
+                dicom_file = dicom.read_file(os.path.join(path, dicom_filename), stop_before_pixels=True)
                 dicom_comment = _get_dicom_comment(dicom_file)
                 dicom_timestamp = _get_dicom_timestamp(dicom_file)
                 _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
@@ -113,7 +113,7 @@ def read_dicom_comments(path):
                 continue
     else:
         try:
-            dicom_file = dicom.read_file(path)
+            dicom_file = dicom.read_file(path, stop_before_pixels=True)
             dicom_comment = _get_dicom_comment(dicom_file)
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
             _print_dicom(path, dicom_comment, dicom_timestamp)
@@ -138,11 +138,11 @@ def run_from_cli():
             print_matching_files(matches)
 
         elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
-            dicom_file = dicom.read_file(sys.argv[1])
+            dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
             _find_matching_files(dicom_file, sys.argv[2])
 
         else:  # both inputs are files
-            dicom_file = dicom.read_file(sys.argv[1])
+            dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
             raw_file = tifffile.TiffFile(sys.argv[2])
             check_result = _check_match(dicom_file, raw_file)
 
