@@ -23,12 +23,14 @@ def _get_raw_timestamp(raw_file):
 
 
 def _check_match(dicom_file, raw_file):
+    """ Check if the timestamp of a DICOM file matches the timestamp of a RAW file """
     timestamp_dicom = _get_dicom_timestamp(dicom_file)
     timestamp_raw = _get_raw_timestamp(raw_file)
     return timestamp_dicom == timestamp_raw
 
 
 def _find_matching_files(dicom_file, raw_dir, verbose=False):
+    """ Searches a directory for matching RAW files """
     raw_filenames = os.listdir(raw_dir)
     target_time = _get_dicom_timestamp(dicom_file)
     matches = []
@@ -52,6 +54,7 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
 
 
 def match_directories(dicom_dir, raw_dir):
+    """ Finds matching files in two directories (one DICOM and one RAW) """
     matches = {}
     dicom_filenames = os.listdir(dicom_dir)
     for dicom_filename in dicom_filenames:
@@ -59,7 +62,7 @@ def match_directories(dicom_dir, raw_dir):
             dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename), stop_before_pixels=True)
             matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
         except dicom.errors.InvalidDicomError:
-            print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).rjust(20))
+            print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
             continue
     return matches
 
@@ -73,6 +76,7 @@ def _get_dicom_comment(dicom_file):
 
 
 def _get_dicom_timestamp(dicom_file):
+    """ Gets the timestamp from a DICOM file """
     if hasattr(dicom_file, 'AcquisitionDate'):
         datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
                                                   dicom_file.AcquisitionDate[4:6],
@@ -129,6 +133,7 @@ def read_dicom_comments(path):
 
 
 def print_matching_files(matches):
+    """ Pretty print matches-dict """
     for key, value in matches.items():
         print(term.bold_yellow(key).ljust(40) + ' -> ' + term.green(str(value)))
 
