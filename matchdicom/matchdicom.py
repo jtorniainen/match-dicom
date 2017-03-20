@@ -159,6 +159,8 @@ def print_matching_files(matches):
 def run_from_cli():
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('dicom')
+    parser.add_argument('raw')
     parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
     args = parser.parse_args()
 
