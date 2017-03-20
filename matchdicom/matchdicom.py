@@ -96,6 +96,8 @@ def _get_dicom_timestamp(dicom_file):  # FIXME: convert to datetime
     return datetime_str
 
 
+# -------------------- FILE HANDLERS --------------------
+
 def open_dicom(path):
     return dicom.read_file(path, stop_before_pixels=True)
 
@@ -110,7 +112,7 @@ def _get_raw_timestamp(raw_file):
     return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
 
 
-def _print_dicom(filename, comment, timestamp):
+def _print_metadata(filename, comment, timestamp):
     """ Pretty print the indentifiers of a DICOM file """
 
     if not comment:
@@ -125,30 +127,30 @@ def _print_dicom(filename, comment, timestamp):
     print(dicom_str)
 
 
-def read_dicom_comments(path):
+def print_dicom_metadata(path):
     """ Reads comments from all files found in path """
 
     if os.path.isdir(path):
-        dicom_filenames = os.listdir(path)
-        for dicom_filename in dicom_filenames:
+        for dicom_filename in os.listdir(path):
             try:
-                dicom_file = dicom.read_file(os.path.join(path, dicom_filename), stop_before_pixels=True)
+                dicom_file = open_dicom(path)
                 dicom_comment = _get_dicom_comment(dicom_file)
                 dicom_timestamp = _get_dicom_timestamp(dicom_file)
-                _print_dicom(dicom_filename, dicom_comment, dicom_timestamp)
+                _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
 
             except dicom.errors.InvalidDicomError:
-                print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).rjust(20))
+                print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).ljust(20))
                 continue
     else:
         try:
-            dicom_file = dicom.read_file(path, stop_before_pixels=True)
+            dicom_file = open_dicom(path)
             dicom_comment = _get_dicom_comment(dicom_file)
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
-            _print_dicom(path, dicom_comment, dicom_timestamp)
+            _print_metadata(path, dicom_comment, dicom_timestamp)
 
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
+            continue
 
 
 def print_matching_files(matches):
@@ -163,14 +165,9 @@ def run_from_cli():
     parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
     args = parser.parse_args()
 
-    if len(sys.argv) == 2:  # Single file
+    if len(sys.argv) == 2:  # Single file or directory
         if args.r:
-            read_dicom_comments(sys.argv[1])
-            # New structure
-            # 1. Read file
-            # 2. Read comment
-            # 3. Read timestamp
-            # 4. Print results
+            print_dicom_metadata(sys.argv[1])
         else:
             print('RAW argument was used!')
 
