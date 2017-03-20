@@ -159,16 +159,12 @@ def print_matching_files(matches):
 def run_from_cli():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('dicom')
-    parser.add_argument('raw')
+    parser.add_argument('targets', nargs='*')
     parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
     args = parser.parse_args()
 
-    if len(sys.argv) == 2:  # Single file or directory
-        if args.r:
-            print_dicom_metadata(sys.argv[1])
-        else:
-            print('RAW argument was used!')
+    if len(args.targets) == 1:  # Single file or directory
+        print_dicom_metadata(args.targets[1])
 
     elif len(sys.argv) == 3:  # Two files
 
