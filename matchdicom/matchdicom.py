@@ -16,12 +16,7 @@ import argparse
 # jtorniainen
 # UEF 2017, MIT License
 
-# TODO: Read some flags from argparse
-# -r input files are RAW and not dicom
-
 # TODO: convert time stamps to datetimes instead of strings
-
-# TODO: better logic in naming functions
 
 
 term = blessings.Terminal()
@@ -80,6 +75,24 @@ def _get_dicom_comment(dicom_file):
         return None
 
 
+# -------------------- FILE HANDLERS --------------------
+
+def open_dicom(path):
+    return dicom.read_file(path, stop_before_pixels=True)
+
+
+def open_raw(path):
+    return tifffile.TiffFile(path)
+
+# TIMESTAMPS
+
+
+def _get_raw_timestamp(raw_file):
+    """ Returns the timestamp of the raw file """
+    timestamp_str = raw_file.pages[0].tags['datetime'].value.decode('ascii')
+    return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
+
+
 def _get_dicom_timestamp(dicom_file):  # FIXME: convert to datetime
     """ Gets the timestamp from a DICOM file """
     if hasattr(dicom_file, 'AcquisitionDate'):
@@ -96,24 +109,10 @@ def _get_dicom_timestamp(dicom_file):  # FIXME: convert to datetime
     return datetime_str
 
 
-# -------------------- FILE HANDLERS --------------------
-
-def open_dicom(path):
-    return dicom.read_file(path, stop_before_pixels=True)
-
-
-def open_raw(path):
-    return tifffile.TiffFile(path)
-
-
-def _get_raw_timestamp(raw_file):
-    """ Returns the timestamp of the raw file """
-    timestamp_str = raw_file.pages[0].tags['datetime'].value.decode('ascii')
-    return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
-
+# PRINTING FUNCTIONS
 
 def _print_metadata(filename, comment, timestamp):
-    """ Pretty print the indentifiers of a DICOM file """
+    """ Pretty print the metadata of a DICOM/RAW file """
 
     if not comment:
         comment = '<None>'
@@ -121,10 +120,7 @@ def _print_metadata(filename, comment, timestamp):
     if not timestamp:
         timestamp = '<None>'
 
-    dicom_str = (filename.ljust(20) +
-                 term.magenta_bold(comment).ljust(60) +
-                 term.yellow(timestamp))
-    print(dicom_str)
+    print(filename.ljust(20) + term.magenta_bold(comment).ljust(60) + term.yellow(timestamp))
 
 
 def print_dicom_metadata(path):
@@ -158,6 +154,8 @@ def print_matching_files(matches):
     for key, value in matches.items():
         print(term.bold_yellow(key).ljust(40) + ' -> ' + term.green(str(value)))
 
+
+# MAIN--------------------------------------------------
 
 def run_from_cli():
 
