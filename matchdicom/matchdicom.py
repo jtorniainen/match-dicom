@@ -5,6 +5,8 @@ import os
 import sys
 import tifffile
 import blessings
+import datetime
+import argparse
 
 # Maps DICOM files to RAW files using timestamps
 # Usage: ./map-dicom DICOM RAW
@@ -14,7 +16,18 @@ import blessings
 # jtorniainen
 # UEF 2017, MIT License
 
+# TODO: Read some flags from argparse
+# -r input files are RAW and not dicom
+
+# TODO: convert time stamps to datetimes instead of strings
+
+
 term = blessings.Terminal()
+
+
+def _raw_timestamp_to_datetime(raw_timestamp):
+    """ Returns the timestamp of the raw file """
+    return datetime.datetime.strptime(raw_timestamp, '%Y:%m:%d %H:%M:%S')
 
 
 def _get_raw_timestamp(raw_file):
@@ -139,6 +152,7 @@ def print_matching_files(matches):
 
 
 def run_from_cli():
+
     if len(sys.argv) == 2:  # Single file
         read_dicom_comments(sys.argv[1])
 
