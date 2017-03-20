@@ -146,7 +146,6 @@ def print_dicom_metadata(path):
 
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
-            continue
 
 
 def print_matching_files(matches):
