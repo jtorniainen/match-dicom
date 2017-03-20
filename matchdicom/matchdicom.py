@@ -21,18 +21,10 @@ import argparse
 
 # TODO: convert time stamps to datetimes instead of strings
 
+# TODO: better logic in naming functions
+
 
 term = blessings.Terminal()
-
-
-def _raw_timestamp_to_datetime(raw_timestamp):
-    """ Returns the timestamp of the raw file """
-    return datetime.datetime.strptime(raw_timestamp, '%Y:%m:%d %H:%M:%S')
-
-
-def _get_raw_timestamp(raw_file):
-    """ Returns the timestamp of the raw file """
-    return raw_file.pages[0].tags['datetime'].value.decode('ascii')  # TODO: Add checks to see if this value exists
 
 
 def _check_match(dicom_file, raw_file):
@@ -88,7 +80,7 @@ def _get_dicom_comment(dicom_file):
         return None
 
 
-def _get_dicom_timestamp(dicom_file):
+def _get_dicom_timestamp(dicom_file):  # FIXME: convert to datetime
     """ Gets the timestamp from a DICOM file """
     if hasattr(dicom_file, 'AcquisitionDate'):
         datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
@@ -102,6 +94,20 @@ def _get_dicom_timestamp(dicom_file):
         datetime_str = None
 
     return datetime_str
+
+
+def open_dicom(path):
+    return dicom.read_file(path, stop_before_pixels=True)
+
+
+def open_raw(path):
+    return tifffile.TiffFile(path)
+
+
+def _get_raw_timestamp(raw_file):
+    """ Returns the timestamp of the raw file """
+    timestamp_str = raw_file.pages[0].tags['datetime'].value.decode('ascii')
+    return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
 
 
 def _print_dicom(filename, comment, timestamp):
@@ -153,8 +159,20 @@ def print_matching_files(matches):
 
 def run_from_cli():
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
+    args = parser.parse_args()
+
     if len(sys.argv) == 2:  # Single file
-        read_dicom_comments(sys.argv[1])
+        if args.r:
+            read_dicom_comments(sys.argv[1])
+            # New structure
+            # 1. Read file
+            # 2. Read comment
+            # 3. Read timestamp
+            # 4. Print results
+        else:
+            print('RAW argument was used!')
 
     elif len(sys.argv) == 3:  # Two files
 
