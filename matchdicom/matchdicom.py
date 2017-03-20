@@ -190,7 +190,8 @@ def run_from_cli():
 
     if len(args.targets) == 1:  # Single file or directory
         if args.r:
-            print_raw_metadata(args.target[0])
+            print('DEBUG: Reading from RAW')
+            print_raw_metadata(args.targets[0])
         else:
             print_dicom_metadata(args.targets[0])
 
