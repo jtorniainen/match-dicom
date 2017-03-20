@@ -124,7 +124,7 @@ def _print_metadata(filename, comment, timestamp):
 
 
 def print_dicom_metadata(path):
-    """ Reads comments from all files found in path """
+    """ Reads comments and timestamps from all DICOM files found in path """
 
     if os.path.isdir(path):
         for dicom_filename in os.listdir(path):
@@ -148,6 +148,31 @@ def print_dicom_metadata(path):
             print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
 
 
+def print_raw_metadata(path):
+    """ Reads comments and timestamps from all RAW files found in path """
+
+    if os.path.isdir(path):
+        for raw_filename in os.listdir(path):
+            try:
+                raw_file = open_raw(path)
+                raw_comment = ''
+                raw_timestamp = _get_raw_timestamp(raw_file)
+                _print_metadata(raw_filename, raw_comment, raw_timestamp)
+
+            except dicom.errors.InvalidDicomError:
+                print(term.red_bold('WARNING:') + '{} not DICOM'.format(raw_filename).ljust(20))
+                continue
+    else:
+        try:
+            raw_file = open_raw(path)
+            raw_comment = ''
+            raw_timestamp = _get_raw_timestamp(raw_file)
+            _print_metadata(raw_filename, raw_comment, raw_timestamp)
+
+        except dicom.errors.InvalidDicomError:
+            print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
+
+
 def print_matching_files(matches):
     """ Pretty print matches-dict """
     for key, value in matches.items():
@@ -164,9 +189,12 @@ def run_from_cli():
     args = parser.parse_args()
 
     if len(args.targets) == 1:  # Single file or directory
-        print_dicom_metadata(args.targets[0])
+        if args.r:
+            print_raw_metadata(args.target[0])
+        else:
+            print_dicom_metadata(args.targets[0])
 
-    elif len(sys.argv) == 3:  # Two files
+    elif len(sys.argv) == 3:  # Two files (this branch is probably now broken)
 
         if os.path.isdir(sys.argv[1]) and os.path.isdir(sys.argv[2]):  # both dirs
             matches = match_directories(sys.argv[1], sys.argv[2])
