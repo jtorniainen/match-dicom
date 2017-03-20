@@ -164,7 +164,7 @@ def run_from_cli():
     args = parser.parse_args()
 
     if len(args.targets) == 1:  # Single file or directory
-        print_dicom_metadata(args.targets[1])
+        print_dicom_metadata(args.targets[0])
 
     elif len(sys.argv) == 3:  # Two files
 
