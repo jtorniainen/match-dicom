@@ -167,7 +167,7 @@ def print_raw_metadata(path):
             raw_file = open_raw(path)
             raw_comment = ''
             raw_timestamp = _get_raw_timestamp(raw_file)
-            _print_metadata(raw_filename, raw_comment, raw_timestamp)
+            _print_metadata(path, raw_comment, raw_timestamp)
 
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
