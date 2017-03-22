@@ -139,6 +139,10 @@ def print_dicom_metadata(path):
             except dicom.errors.InvalidDicomError:
                 print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).ljust(20))
                 continue
+
+            except IsADirectoryError:
+                print(term.red_bold('WARNING:') + '{} is a directory'.format(dicom_filename).ljust(20))
+                continue
     else:
         try:
             dicom_file = open_dicom(path)
