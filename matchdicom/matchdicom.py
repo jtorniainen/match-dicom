@@ -31,7 +31,7 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
 
                 time_diff = max([time_dicom, time_raw]) - min([time_dicom, time_raw])
 
-                if time_diff < 2.0:
+                if time_diff.total_seconds() < 2.0:
                     if verbose:
                         print(term.green_bold('Found: ') + '{} is a match (Δ={})'.format(raw_filename, str(time_diff)))
                     matches.append(raw_filename)
