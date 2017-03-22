@@ -202,9 +202,9 @@ def print_comparison(dicom_filename, raw_filename):
 
     name_dicom = dicom_filename.ljust(30)
     name_raw = raw_filename.ljust(30)
-    time_raw = term.yellow(raw_time)
-    time_dicom = term.yellow(dicom_time)
-    time_diff = ' (Δ=' + term.green(time_diff) + ') '
+    time_raw = term.yellow(str(raw_time))
+    time_dicom = term.yellow(str(dicom_time))
+    time_diff = ' (Δ=' + term.green(str(time_diff)) + ') '
     comment_dicom = term.magenta(dicom_comment).ljust(30)
     print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
 
