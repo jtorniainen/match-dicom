@@ -23,6 +23,7 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
     """ Searches a directory for matching RAW files """
 
     time_dicom = _get_dicom_timestamp(dicom_file)
+
     if not time_dicom:
         return None
 
@@ -37,7 +38,6 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
                 if time_diff.total_seconds() < 2.0:
                     if verbose:
                         msg = term.bold_black_on_green('Found {} is a match (Δ={})'.format(raw_filename, str(time_diff)))
-                        # print(term.green_bold('Found: ') + '{} is a match (Δ={})'.format(raw_filename, str(time_diff)))
                         print(msg)
                     matches.append(raw_filename)
                 else:
@@ -192,7 +192,7 @@ def print_raw_metadata(path):
 def print_matching_files(matches):
     """ Pretty print matches-dict """
     for key, value in matches.items():
-        print(term.bold_yellow(key).ljust(40) + ' -> ' + term.green(str(value)))
+        print(key.ljust(30) + ' ↔ ' + term.green(str(value).strip('[').strip(']')))
 
 
 def print_comparison(dicom_filename, raw_filename):
