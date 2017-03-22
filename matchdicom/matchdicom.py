@@ -187,7 +187,7 @@ def print_matching_files(matches):
 
 
 def print_comparison(dicom_filename, raw_filename):
-    """ """
+    """ Print the comparison of meta data from a DICOM-RAW pair """
     dicom_data = open_dicom(dicom_filename)
     raw_data = open_raw(raw_filename)
 
@@ -200,7 +200,7 @@ def print_comparison(dicom_filename, raw_filename):
     dicom_filename = os.path.basename(dicom_filename)
     raw_filename = os.path.basename(raw_filename)
 
-    print('{:30} {:30} {} {} {} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
+    print('{:30} {:30} {} (Δ={}) {:30} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
 
 
 # MAIN--------------------------------------------------
