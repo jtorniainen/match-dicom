@@ -45,11 +45,13 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
                         print(term.red('!:') + '{} is not a match (Δ={})'.format(raw_filename, str(time_diff)))
 
             except ValueError:
-                print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
+                if verbose:
+                    print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
                 continue
 
             except IsADirectoryError:
-                print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(raw_filename))
+                if verbose:
+                    print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(raw_filename))
                 continue
     return matches
 
@@ -65,10 +67,12 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
             dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
             matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir, verbose)
         except dicom.errors.InvalidDicomError:
-            print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
+            if verbose:
+                print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
             continue
         except IsADirectoryError:
-            print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(dicom_filename))
+            if verbose:
+                print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(dicom_filename))
             continue
     return matches
 
@@ -198,7 +202,6 @@ def print_matching_files(matches):
             print(key.ljust(35) + ' ↔ ' + term.red(str(value).strip('[').strip(']')))
 
 
-
 def print_comparison(dicom_filename, raw_filename):
     """ Print the comparison of meta data from a DICOM-RAW pair """
     try:
@@ -241,6 +244,7 @@ def run_from_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', nargs='*')
     parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
+    parser.add_argument('-v', help='Verbose-mode on', action='store_true')
     args = parser.parse_args()
 
     if len(args.targets) == 1:  # Single file or directory
@@ -252,7 +256,7 @@ def run_from_cli():
     elif len(args.targets) == 2:  # Two files (this branch is probably now broken)
 
         if os.path.isdir(args.targets[0]) and os.path.isdir(args.targets[1]):  # both dirs
-            matches = match_directories(args.targets[0], args.targets[1], verbose=True)
+            matches = match_directories(args.targets[0], args.targets[1], verbose=args.v)
             print_matching_files(matches)
 
         elif os.path.isdir(args.targets[1]):
