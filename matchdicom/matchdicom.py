@@ -192,7 +192,11 @@ def print_raw_metadata(path):
 def print_matching_files(matches):
     """ Pretty print matches-dict """
     for key, value in matches.items():
-        print(key.ljust(30) + ' ↔ ' + term.green(str(value).strip('[').strip(']')))
+        if value:
+            print(key.ljust(35) + ' ↔ ' + term.green(str(value).strip('[').strip(']')))
+        else:
+            print(key.ljust(35) + ' ↔ ' + term.red(str(value).strip('[').strip(']')))
+
 
 
 def print_comparison(dicom_filename, raw_filename):
