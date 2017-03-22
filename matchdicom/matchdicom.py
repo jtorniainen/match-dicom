@@ -42,6 +42,10 @@ def _find_matching_files(dicom_file, raw_dir, verbose=False):
             except ValueError:
                 print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
                 continue
+
+            except IsADirectoryError:
+                print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(raw_filename))
+                continue
     return matches
 
 
@@ -57,6 +61,9 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
             matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir, verbose)
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
+            continue
+        except IsADirectoryError:
+            print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(dicom_filename))
             continue
     return matches
 
