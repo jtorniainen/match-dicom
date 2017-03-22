@@ -189,7 +189,7 @@ def print_matching_files(matches):
 def print_comparison(dicom_filename, raw_filename):
     """ """
     dicom_data = open_dicom(dicom_filename)
-    raw_data = open_dicom(raw_filename)
+    raw_data = open_raw(raw_filename)
 
     dicom_time = _get_dicom_timestamp(dicom_data)
     dicom_comment = _get_dicom_comment(dicom_data)
