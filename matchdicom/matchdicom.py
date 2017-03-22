@@ -137,11 +137,11 @@ def print_dicom_metadata(path):
                 _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
 
             except dicom.errors.InvalidDicomError:
-                print(term.red_bold('WARNING:') + '{} not DICOM'.format(dicom_filename).ljust(20))
+                print(term.red_bold('WARNING: ') + '{} not DICOM'.format(dicom_filename))
                 continue
 
             except IsADirectoryError:
-                print(term.red_bold('WARNING:') + '{} is a directory'.format(dicom_filename).ljust(20))
+                print(term.red_bold('WARNING: ') + '{} is a directory'.format(dicom_filename))
                 continue
     else:
         try:
@@ -151,7 +151,7 @@ def print_dicom_metadata(path):
             _print_metadata(path, dicom_comment, dicom_timestamp)
 
         except dicom.errors.InvalidDicomError:
-            print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
+            print(term.red_bold('WARNING: ') + '{} not DICOM'.format(path))
 
 
 def print_raw_metadata(path):
@@ -165,8 +165,12 @@ def print_raw_metadata(path):
                 raw_timestamp = _get_raw_timestamp(raw_file)
                 _print_metadata(raw_filename, raw_comment, raw_timestamp)
 
-            except dicom.errors.InvalidDicomError:
-                print(term.red_bold('WARNING:') + '{} not DICOM'.format(raw_filename).ljust(20))
+            except ValueError:
+                print(term.red_bold('WARNING: ') + '{} not RAW'.format(raw_filename))
+                continue
+
+            except IsADirectoryError:
+                print(term.red_bold('WARNING: ') + '{} is a directory'.format(raw_filename))
                 continue
     else:
         try:
@@ -175,8 +179,8 @@ def print_raw_metadata(path):
             raw_timestamp = _get_raw_timestamp(raw_file)
             _print_metadata(path, raw_comment, raw_timestamp)
 
-        except dicom.errors.InvalidDicomError:
-            print(term.red_bold('WARNING:').ljust(20) + '{} not DICOM'.format(path))
+        except ValueError:
+            print(term.red_bold('WARNING: ').ljust(20) + '{} not RAW'.format(path))
 
 
 def print_matching_files(matches):
