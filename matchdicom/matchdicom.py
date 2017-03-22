@@ -122,7 +122,7 @@ def _print_metadata(filename, comment, timestamp):
     else:
         timestamp = str(timestamp)
 
-    print(filename.ljust(20) + term.magenta_bold(comment).ljust(60) + term.yellow(timestamp))
+    print(filename.ljust(60) + term.magenta_bold(comment).ljust(60) + term.yellow(timestamp))
 
 
 def print_dicom_metadata(path):
@@ -219,5 +219,6 @@ def run_from_cli():
                 print(term.green_bold('Match found'))
             else:
                 print(term.red_bold('No match found'))
+
     else:
         print('match-dicom takes exactly TWO input arguments! ')
