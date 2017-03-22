@@ -188,8 +188,17 @@ def print_matching_files(matches):
 
 def print_comparison(dicom_filename, raw_filename):
     """ Print the comparison of meta data from a DICOM-RAW pair """
-    dicom_data = open_dicom(dicom_filename)
-    raw_data = open_raw(raw_filename)
+    try:
+        dicom_data = open_dicom(dicom_filename)
+    except dicom.errors.InvalidDicomError:
+        print(term.red_bold('WARNING: ') + '{} not DICOM'.format(dicom_filename))
+        return
+
+    try:
+        raw_data = open_raw(raw_filename)
+    except ValueError:
+        print(term.red_bold('WARNING: ').ljust(20) + '{} not RAW'.format(raw_filename))
+        return
 
     dicom_time = _get_dicom_timestamp(dicom_data)
     dicom_comment = _get_dicom_comment(dicom_data)
@@ -204,11 +213,12 @@ def print_comparison(dicom_filename, raw_filename):
     name_raw = raw_filename.ljust(30)
     time_raw = term.yellow(str(raw_time))
     time_dicom = term.yellow(str(dicom_time))
-    time_diff = ' (Δ=' + term.green(str(time_diff)) + ') '
-    comment_dicom = term.magenta(dicom_comment).ljust(30)
+    if time_diff.total_seconds() > 2:
+        time_diff = ' (Δ=' + term.red(str(time_diff)) + ') '
+    else:
+        time_diff = ' (Δ=' + term.green(str(time_diff)) + ') '
+    comment_dicom = term.magenta(dicom_comment).ljust(60)
     print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
-
-    # print('{:30} {:30} {} (Δ={}) {} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
 
 
 # MAIN--------------------------------------------------
@@ -233,10 +243,9 @@ def run_from_cli():
             # matches = match_directories(sys.argv[1], sys.argv[2])
             # print_matching_files(matches)
 
-        elif os.path.isdir(args.targets[1]):  # both dirs TODO: Enable the -r flag
-            pass
-            # dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
-            # _find_matching_files(dicom_file, sys.argv[2], verbose=True)
+        elif os.path.isdir(args.targets[1]):
+            for raw_file in os.listdir(args.targets[1]):
+                print_comparison(args.target[0], os.path.join(args.targets[1], raw_file))
 
         else:  # both inputs are files
             print_comparison(args.targets[0], args.targets[1])
