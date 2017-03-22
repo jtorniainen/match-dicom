@@ -19,45 +19,42 @@ import argparse
 term = blessings.Terminal()
 
 
-def _check_match(dicom_file, raw_file):
-    """ Check if the timestamp of a DICOM file matches the timestamp of a RAW file """
-    timestamp_dicom = _get_dicom_timestamp(dicom_file)
-    timestamp_raw = _get_raw_timestamp(raw_file)
-    return timestamp_dicom == timestamp_raw
-
-
 def _find_matching_files(dicom_file, raw_dir, verbose=False):
     """ Searches a directory for matching RAW files """
-    raw_filenames = os.listdir(raw_dir)
-    target_time = _get_dicom_timestamp(dicom_file)
+
+    time_dicom = _get_dicom_timestamp(dicom_file)
     matches = []
-    for raw_filename in raw_filenames:
+    for raw_filename in os.listdir(raw_dir):
             try:
-                raw_file = tifffile.TiffFile(os.path.join(raw_dir, raw_filename))
-                raw_timestamp = _get_raw_timestamp(raw_file)
+                raw_file = open_raw(os.path.join(raw_dir, raw_filename))
+                time_raw = _get_raw_timestamp(raw_file)
 
-                if verbose:
-                    print(term.yellow_bold('Checking: ') + '{} vs. {} ({})'.format(target_time,
-                                                                                   raw_timestamp,
-                                                                                   raw_filename))
+                time_diff = max([time_dicom, time_raw]) - min([time_dicom, time_raw])
 
-                if target_time == raw_timestamp:
-                    print(term.green_bold('Found: ') + '{} is a match'.format(raw_filename))
+                if time_diff < 2.0:
+                    if verbose:
+                        print(term.green_bold('Found: ') + '{} is a match (Δ={})'.format(raw_filename, str(time_diff)))
                     matches.append(raw_filename)
+                else:
+                    if verbose:
+                        print(term.red('!:') + '{} is not a match (Δ={})'.format(raw_filename, str(time_diff)))
 
             except ValueError:
                 print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
+                continue
     return matches
 
 
-def match_directories(dicom_dir, raw_dir):
+def match_directories(dicom_dir, raw_dir, verbose=False):
     """ Finds matching files in two directories (one DICOM and one RAW) """
     matches = {}
     dicom_filenames = os.listdir(dicom_dir)
     for dicom_filename in dicom_filenames:
         try:
-            dicom_file = dicom.read_file(os.path.join(dicom_dir, dicom_filename), stop_before_pixels=True)
-            matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir)
+            if verbose:
+                print('\t{}:'.format(dicom_filename))
+            dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
+            matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir, verbose)
         except dicom.errors.InvalidDicomError:
             print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
             continue
@@ -217,7 +214,7 @@ def print_comparison(dicom_filename, raw_filename):
         time_diff = ' (Δ=' + term.red(str(time_diff)) + ') '
     else:
         time_diff = ' (Δ=' + term.green(str(time_diff)) + ') '
-    comment_dicom = term.magenta(dicom_comment).ljust(60)
+    comment_dicom = term.magenta(dicom_comment).ljust(45)
     print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
 
 
@@ -239,9 +236,8 @@ def run_from_cli():
     elif len(args.targets) == 2:  # Two files (this branch is probably now broken)
 
         if os.path.isdir(args.targets[0]) and os.path.isdir(args.targets[1]):  # both dirs
-            pass
-            # matches = match_directories(sys.argv[1], sys.argv[2])
-            # print_matching_files(matches)
+            matches = match_directories(args.targets[0], args.targets[1], verbose=True)
+            print_matching_files(matches)
 
         elif os.path.isdir(args.targets[1]):
             for raw_file in os.listdir(args.targets[1]):
