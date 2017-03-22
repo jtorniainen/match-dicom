@@ -160,7 +160,7 @@ def print_raw_metadata(path):
     if os.path.isdir(path):
         for raw_filename in os.listdir(path):
             try:
-                raw_file = open_raw(path)
+                raw_file = open_raw(os.path.join(path, raw_filename))
                 raw_comment = ''
                 raw_timestamp = _get_raw_timestamp(raw_file)
                 _print_metadata(raw_filename, raw_comment, raw_timestamp)
