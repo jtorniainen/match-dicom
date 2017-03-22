@@ -200,7 +200,15 @@ def print_comparison(dicom_filename, raw_filename):
     dicom_filename = os.path.basename(dicom_filename)
     raw_filename = os.path.basename(raw_filename)
 
-    print('{:30} {:30} {} (Δ={}) {:30} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
+    name_dicom = dicom_filename.ljust(30)
+    name_raw = raw_filename.ljust(30)
+    time_raw = term.yellow(raw_time)
+    time_dicom = term.yellow(dicom_time)
+    time_diff = ' (Δ=' + term.green(time_diff) + ') '
+    comment_dicom = term.magenta(dicom_comment).ljust(30)
+    print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
+
+    # print('{:30} {:30} {} (Δ={}) {} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
 
 
 # MAIN--------------------------------------------------
