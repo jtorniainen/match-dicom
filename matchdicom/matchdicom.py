@@ -128,15 +128,10 @@ def _print_metadata(filename, comment, timestamp):
 def print_dicom_metadata(path):
     """ Reads comments and timestamps from all DICOM files found in path """
 
-    print('***DEBUG***')
-    print('path=' + path)
-    print(os.path.isdir(path))
-    print('***DEBUG***')
-
     if os.path.isdir(path):
         for dicom_filename in os.listdir(path):
             try:
-                dicom_file = open_dicom(path)
+                dicom_file = open_dicom(os.path.join(path, dicom_filename))
                 dicom_comment = _get_dicom_comment(dicom_file)
                 dicom_timestamp = _get_dicom_timestamp(dicom_file)
                 _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
