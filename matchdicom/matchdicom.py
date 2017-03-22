@@ -119,6 +119,8 @@ def _print_metadata(filename, comment, timestamp):
 
     if not timestamp:
         timestamp = '<None>'
+    else:
+        timestamp = str(timestamp)
 
     print(filename.ljust(20) + term.magenta_bold(comment).ljust(60) + term.yellow(timestamp))
 
