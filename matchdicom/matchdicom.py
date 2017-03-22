@@ -2,7 +2,6 @@
 
 import dicom
 import os
-import sys
 import tifffile
 import blessings
 import datetime
@@ -15,8 +14,6 @@ import argparse
 #
 # jtorniainen
 # UEF 2017, MIT License
-
-# TODO: convert time stamps to datetimes instead of strings
 
 
 term = blessings.Terminal()
@@ -189,6 +186,21 @@ def print_matching_files(matches):
         print(term.bold_yellow(key).ljust(40) + ' -> ' + term.green(str(value)))
 
 
+def print_comparison(dicom_filename, raw_filename):
+    """ """
+    dicom_data = open_dicom(dicom_filename)
+    raw_data = open_dicom(raw_filename)
+
+    dicom_time = _get_dicom_timestamp(dicom_data)
+    dicom_comment = _get_dicom_comment(dicom_data)
+
+    raw_time = _get_raw_timestamp(raw_data)
+
+    time_diff = dicom_time - raw_time
+
+    print('{:60} {:60} {} {:5} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
+
+
 # MAIN--------------------------------------------------
 
 def run_from_cli():
@@ -204,25 +216,17 @@ def run_from_cli():
         else:
             print_dicom_metadata(args.targets[0])
 
-    elif len(sys.argv) == 3:  # Two files (this branch is probably now broken)
+    elif len(args.targets) == 2:  # Two files (this branch is probably now broken)
 
-        if os.path.isdir(sys.argv[1]) and os.path.isdir(sys.argv[2]):  # both dirs
-            matches = match_directories(sys.argv[1], sys.argv[2])
-            print_matching_files(matches)
+        if os.path.isdir(args.targets[0]) and os.path.isdir(args.targets[1]):  # both dirs
+            pass
+            # matches = match_directories(sys.argv[1], sys.argv[2])
+            # print_matching_files(matches)
 
-        elif os.path.isdir(sys.argv[2]):  # dicom input is file -> raw input is dir
-            dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
-            _find_matching_files(dicom_file, sys.argv[2], verbose=True)
+        elif os.path.isdir(args.targets[1]):  # both dirs TODO: Enable the -r flag
+            pass
+            # dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
+            # _find_matching_files(dicom_file, sys.argv[2], verbose=True)
 
         else:  # both inputs are files
-            dicom_file = dicom.read_file(sys.argv[1], stop_before_pixels=True)
-            raw_file = tifffile.TiffFile(sys.argv[2])
-            check_result = _check_match(dicom_file, raw_file)
-
-            if check_result:
-                print(term.green_bold('Match found'))
-            else:
-                print(term.red_bold('No match found'))
-
-    else:
-        print('match-dicom takes exactly TWO input arguments! ')
+            print_comparison(args.targets[0], args.targets[1])
