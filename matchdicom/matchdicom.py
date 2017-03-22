@@ -245,7 +245,7 @@ def run_from_cli():
 
         elif os.path.isdir(args.targets[1]):
             for raw_file in os.listdir(args.targets[1]):
-                print_comparison(args.target[0], os.path.join(args.targets[1], raw_file))
+                print_comparison(args.targets[0], os.path.join(args.targets[1], raw_file))
 
         else:  # both inputs are files
             print_comparison(args.targets[0], args.targets[1])
