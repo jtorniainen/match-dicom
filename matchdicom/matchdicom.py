@@ -197,8 +197,10 @@ def print_comparison(dicom_filename, raw_filename):
     raw_time = _get_raw_timestamp(raw_data)
 
     time_diff = max([dicom_time, raw_time]) - min([dicom_time, raw_time])
+    dicom_filename = os.path.basename(dicom_filename)
+    raw_filename = os.path.basename(raw_filename)
 
-    print('{:60} {:60} {} {} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
+    print('{:30} {:30} {} {} {} {}'.format(dicom_filename, dicom_comment, dicom_time, time_diff, raw_time, raw_filename))
 
 
 # MAIN--------------------------------------------------
