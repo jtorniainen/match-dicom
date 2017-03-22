@@ -128,6 +128,11 @@ def _print_metadata(filename, comment, timestamp):
 def print_dicom_metadata(path):
     """ Reads comments and timestamps from all DICOM files found in path """
 
+    print('***DEBUG***')
+    print('path=' + path)
+    print(os.path.isdir(path))
+    print('***DEBUG***')
+
     if os.path.isdir(path):
         for dicom_filename in os.listdir(path):
             try:
@@ -192,7 +197,6 @@ def run_from_cli():
 
     if len(args.targets) == 1:  # Single file or directory
         if args.r:
-            print('DEBUG: Reading from RAW')
             print_raw_metadata(args.targets[0])
         else:
             print_dicom_metadata(args.targets[0])
