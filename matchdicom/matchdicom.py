@@ -93,20 +93,20 @@ def _get_raw_timestamp(raw_file):
     return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
 
 
-def _get_dicom_timestamp(dicom_file):  # FIXME: convert to datetime
+def _get_dicom_timestamp(dicom_file):
     """ Gets the timestamp from a DICOM file """
     if hasattr(dicom_file, 'AcquisitionDate'):
-        datetime_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
-                                                  dicom_file.AcquisitionDate[4:6],
-                                                  dicom_file.AcquisitionDate[6:8],
-                                                  dicom_file.AcquisitionTime[0:2],
-                                                  dicom_file.AcquisitionTime[2:4],
-                                                  dicom_file.AcquisitionTime[4:6])
+        timestamp_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
+                                                   dicom_file.AcquisitionDate[4:6],
+                                                   dicom_file.AcquisitionDate[6:8],
+                                                   dicom_file.AcquisitionTime[0:2],
+                                                   dicom_file.AcquisitionTime[2:4],
+                                                   dicom_file.AcquisitionTime[4:6])
+
+        return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
 
     else:
-        datetime_str = None
-
-    return datetime_str
+        return None
 
 
 # PRINTING FUNCTIONS
