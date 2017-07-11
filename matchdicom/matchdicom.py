@@ -14,7 +14,7 @@ import tifffile
 import blessings
 import datetime
 import argparse
-from logzero import logger
+from logzero import logger, loglevel
 
 
 term = blessings.Terminal()
@@ -234,6 +234,7 @@ def print_comparison(dicom_filename, raw_filename):
 
 def run_from_cli():
 
+    loglevel(100)
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
     parser.add_argument('-r', '--raw-path', help='Path to RAW file or directory')
