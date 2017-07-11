@@ -223,7 +223,7 @@ def print_comparison(dicom_filename, raw_filename):
     print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
 
 
-def run_from_cli2():
+def run_from_cli():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
