@@ -52,8 +52,8 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
                 matches.append(dicom_filename)
                 logger.info('Found matching files')
 
-        except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
-            logger.error('Could not open {}'.format(dicom_filename))
+        except (dicom.errors.InvalidDicomError, IsADirectoryError, TypeError) as error:
+            logger.error('Could not open {} [{}]'.format(dicom_filename, error))
 
     return matches
 
