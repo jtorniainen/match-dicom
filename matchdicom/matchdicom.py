@@ -97,7 +97,7 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
             matches[raw_filename] = _find_matching_files_raw_to_dicom(raw_file, dicom_dir)
 
         except (ValueError, IsADirectoryError) as error:
-            logger.error('Could not open {}'.format(raw_filename)
+            logger.error('Could not open {}'.format(raw_filename))
 
     return matches
 
