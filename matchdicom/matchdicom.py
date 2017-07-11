@@ -164,7 +164,7 @@ def print_dicom_metadata(path):
     for dicom_filename in filelist:
 
         try:
-            dicom_file = open_dicom(os.path.join(path, dicom_filename))
+            dicom_file = open_dicom(dicom_filename)
             dicom_comment = _get_dicom_comment(dicom_file)
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
             _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
@@ -183,7 +183,7 @@ def print_raw_metadata(path):
 
     for raw_filename in filelist:
         try:
-            raw_file = open_raw(os.path.join(path, raw_filename))
+            raw_file = open_raw(raw_filename)
             raw_comment = ''
             raw_timestamp = _get_raw_timestamp(raw_file)
             _print_metadata(raw_filename, raw_comment, raw_timestamp)
