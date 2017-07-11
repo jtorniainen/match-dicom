@@ -41,6 +41,10 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
             dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
             dicom_time = _get_dicom_timestamp(dicom_file)
 
+            logger.debug('{}  vs  {}'.format(raw_file, dicom_file))
+            logger.debug(dicom_time)
+            logger.debug(raw_time)
+
             time_diff = max([dicom_time, raw_time]) - min([dicom_time, raw_time])
             if time_diff.total_seconds() < 2.0:
                 matches.append(dicom_filename)
@@ -235,6 +239,7 @@ def run_from_cli():
     if args.dicom_path and args.raw_path:  # two paths
 
         if os.path.isdir(args.dicom_path) and os.path.isdir(args.raw_path):  # both paths directories
+            logger.debug('Comparing directories')
             matches = match_directories(args.dicom_path, args.raw_path)
             print_matching_files(matches)
 
