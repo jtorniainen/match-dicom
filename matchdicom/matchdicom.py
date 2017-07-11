@@ -41,6 +41,7 @@ def _find_matching_files2(raw_file, dicom_dir):
         except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
             logger.error('{} -> {}'.format(dicom_file, error))
 
+
     return matches
 
 
