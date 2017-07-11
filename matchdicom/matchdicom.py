@@ -54,7 +54,7 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
                 logger.info('Found matching files')
 
         except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
-            logger.error('{} -> {}'.format(dicom_file, error))
+            logger.error('Could not open {}'.format(dicom_file))
 
     return matches
 
@@ -80,7 +80,7 @@ def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TO
                     matches.append(raw_filename)
 
             except (ValueError, IsADirectoryError) as error:
-                logger.error('{} -> {}'.format(raw_filename, error))
+                logger.error('Could not open {}'.format(raw_filename))
 
     return matches
 
