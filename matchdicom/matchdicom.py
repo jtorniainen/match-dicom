@@ -32,6 +32,9 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
 
     raw_time = _get_raw_timestamp(raw_file)
 
+    if not raw_time:
+        return None
+
     matches = []
 
     for dicom_filename in os.listdir(dicom_dir):
@@ -60,6 +63,9 @@ def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TO
     """ Searches a directory for matching RAW files """
 
     dicom_time = _get_dicom_timestamp(dicom_file)
+
+    if not dicom_time:
+        return None
 
     matches = []
     for raw_filename in os.listdir(raw_dir):
