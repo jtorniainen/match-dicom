@@ -6,7 +6,7 @@ import tifffile
 import blessings
 import datetime
 import argparse
-from logzero import logger
+from logzero import logger, loglevel
 
 # Maps DICOM files to RAW files using timestamps
 # Usage: ./map-dicom DICOM RAW
@@ -19,23 +19,29 @@ from logzero import logger
 
 term = blessings.Terminal()
 
-# Re writing the file matching to be more faster (read RAW first)
-def _find_matching_files2(raw_file, dicom_dir, verbose=False):
+
+def _find_matching_files2(raw_file, dicom_dir):
 
     raw_time = _get_raw_timestamp(raw_file)
 
-    # TODO: Is it possible to get no time-stamp as return?
+    matches = []
 
-    match_list = []
     for dicom_filename in os.listdir(dicom_dir):
-        # FIXME: Needs to be a try-block (not all files open)
-        dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
-        dicom_time = _get_dicom_timestamp(dicom_file)
-        time_diff = max([time_dicom, time_raw]) - min([time_dicom, time_raw])
-        if time_diff.total_seconds() < 2.0:
-            # match
-        else:
-            # no match
+
+        try:
+
+            dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
+            dicom_time = _get_dicom_timestamp(dicom_file)
+
+            time_diff = max([dicom_time, raw_time]) - min([dicom_time, raw_time])
+            if time_diff.total_seconds() < 2.0:
+                matches.append(dicom_filename)
+                logger.info('Found matching files')
+
+        except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
+            logger.error('{} -> {}'.format(dicom_file, error))
+
+    return matches
 
 
 def _find_matching_files(dicom_file, raw_dir, verbose=False):
