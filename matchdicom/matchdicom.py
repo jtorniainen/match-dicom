@@ -110,7 +110,8 @@ def _get_dicom_comment(dicom_file):
 
 
 def open_dicom(path):
-    return dicom.read_file(path, stop_before_pixels=True)
+    dicom_file = dicom.read_file(path, stop_before_pixels=True)
+    return dicom_file
 
 
 def open_raw(path):
