@@ -44,7 +44,6 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
             dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
             dicom_time = _get_dicom_timestamp(dicom_file)
 
-            logger.debug('{}  vs  {}'.format(raw_file, dicom_file))
             logger.debug(dicom_time)
             logger.debug(raw_time)
 
@@ -54,7 +53,7 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
                 logger.info('Found matching files')
 
         except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
-            logger.error('Could not open {}'.format(dicom_file))
+            logger.error('Could not open {}'.format(dicom_filename))
 
     return matches
 
