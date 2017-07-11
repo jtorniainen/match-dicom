@@ -14,7 +14,7 @@ import tifffile
 import blessings
 import datetime
 import argparse
-from logzero import logger, loglevel
+from logzero import logger
 
 
 term = blessings.Terminal()
@@ -52,7 +52,7 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
     return matches
 
 
-def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):
+def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TODO: Find out if this is even needed...
     """ Searches a directory for matching RAW files """
 
     dicom_time = _get_dicom_timestamp(dicom_file)
@@ -78,16 +78,16 @@ def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):
 def match_directories(dicom_dir, raw_dir, verbose=False):
     """ Finds matching files in two directories (one DICOM and one RAW) """
     matches = {}
-    dicom_filenames = os.listdir(dicom_dir)
-    for dicom_filename in dicom_filenames:
-        try:
-            if verbose:
-                print('\t{}:'.format(dicom_filename))
-            dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
-            matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir, verbose)
 
-        except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
-            logger.error('{} -> {}'.format(dicom_filename, error))
+    raw_filenames = os.listdir(raw_dir)
+
+    for raw_filename in raw_filenames:
+        try:
+            raw_file = open_raw(os.path.join(raw_dir, raw_filename))
+            matches[raw_filename] = _find_matching_files_raw_to_dicom(raw_file, dicom_dir)
+
+        except (ValueError, IsADirectoryError) as error:
+            logger.error('{} -> {}'.format(raw_filename, error))
 
     return matches
 
@@ -100,16 +100,12 @@ def _get_dicom_comment(dicom_file):
         return None
 
 
-# -------------------- FILE HANDLERS --------------------
-
 def open_dicom(path):
     return dicom.read_file(path, stop_before_pixels=True)
 
 
 def open_raw(path):
     return tifffile.TiffFile(path)
-
-# TIMESTAMPS
 
 
 def _get_raw_timestamp(raw_file):
@@ -134,8 +130,6 @@ def _get_dicom_timestamp(dicom_file):
         return None
 
 
-# PRINTING FUNCTIONS
-
 def _print_metadata(filename, comment, timestamp):
     """ Pretty print the metadata of a DICOM/RAW file """
 
@@ -154,58 +148,39 @@ def print_dicom_metadata(path):
     """ Reads comments and timestamps from all DICOM files found in path """
 
     if os.path.isdir(path):
-        for dicom_filename in os.listdir(path):
-            try:
-                dicom_file = open_dicom(os.path.join(path, dicom_filename))
-                dicom_comment = _get_dicom_comment(dicom_file)
-                dicom_timestamp = _get_dicom_timestamp(dicom_file)
-                _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
-
-            except dicom.errors.InvalidDicomError:
-                print(term.red_bold('WARNING: ') + '{} not DICOM'.format(dicom_filename))
-                continue
-
-            except IsADirectoryError:
-                print(term.red_bold('WARNING: ') + '{} is a directory'.format(dicom_filename))
-                continue
+        filelist = [os.path.join(path, filename) for filename in os.listdir(path)]
     else:
+        filelist = [path]
+
+    for dicom_filename in filelist:
+
         try:
-            dicom_file = open_dicom(path)
+            dicom_file = open_dicom(os.path.join(path, dicom_filename))
             dicom_comment = _get_dicom_comment(dicom_file)
             dicom_timestamp = _get_dicom_timestamp(dicom_file)
-            _print_metadata(path, dicom_comment, dicom_timestamp)
+            _print_metadata(dicom_filename, dicom_comment, dicom_timestamp)
 
-        except dicom.errors.InvalidDicomError:
-            print(term.red_bold('WARNING: ') + '{} not DICOM'.format(path))
+        except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
+            logger.error('{} -> {}'.format(dicom_filename, error))
 
 
 def print_raw_metadata(path):
     """ Reads comments and timestamps from all RAW files found in path """
 
     if os.path.isdir(path):
-        for raw_filename in os.listdir(path):
-            try:
-                raw_file = open_raw(os.path.join(path, raw_filename))
-                raw_comment = ''
-                raw_timestamp = _get_raw_timestamp(raw_file)
-                _print_metadata(raw_filename, raw_comment, raw_timestamp)
-
-            except ValueError:
-                print(term.red_bold('WARNING: ') + '{} not RAW'.format(raw_filename))
-                continue
-
-            except IsADirectoryError:
-                print(term.red_bold('WARNING: ') + '{} is a directory'.format(raw_filename))
-                continue
+        filelist = [os.path.join(path, filename) for filename in os.listdir(path)]
     else:
+        filelist = [path]
+
+    for raw_filename in filelist:
         try:
-            raw_file = open_raw(path)
+            raw_file = open_raw(os.path.join(path, raw_filename))
             raw_comment = ''
             raw_timestamp = _get_raw_timestamp(raw_file)
-            _print_metadata(path, raw_comment, raw_timestamp)
+            _print_metadata(raw_filename, raw_comment, raw_timestamp)
 
-        except ValueError:
-            print(term.red_bold('WARNING: ').ljust(20) + '{} not RAW'.format(path))
+        except (ValueError, IsADirectoryError) as error:
+            logger.error('{} -> {}'.format(raw_filename, error))
 
 
 def print_matching_files(matches):
@@ -219,16 +194,12 @@ def print_matching_files(matches):
 
 def print_comparison(dicom_filename, raw_filename):
     """ Print the comparison of meta data from a DICOM-RAW pair """
-    try:
-        dicom_data = open_dicom(dicom_filename)
-    except dicom.errors.InvalidDicomError:
-        print(term.red_bold('WARNING: ') + '{} not DICOM'.format(dicom_filename))
-        return
 
     try:
+        dicom_data = open_dicom(dicom_filename)
         raw_data = open_raw(raw_filename)
-    except ValueError:
-        print(term.red_bold('WARNING: ').ljust(20) + '{} not RAW'.format(raw_filename))
+    except (dicom.errors.InvalidDicomError, ValueError) as error:
+        logger.error('{} {} -> {}'.format(dicom_filename, raw_filename, error))
         return
 
     dicom_time = _get_dicom_timestamp(dicom_data)
@@ -252,10 +223,7 @@ def print_comparison(dicom_filename, raw_filename):
     print(name_dicom + comment_dicom + time_dicom + time_diff + time_raw, name_raw)
 
 
-# MAIN--------------------------------------------------
-
-
-# def run_from_cli2():
+def run_from_cli2():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
@@ -271,9 +239,12 @@ def print_comparison(dicom_filename, raw_filename):
             print_matching_files(matches)
 
         elif os.path.isdir(args.dicom_path):
+            pass  # FIXME: Implement this
         elif os.path.isdir(args.raw_path):
-        else:  # both files
+            pass  # FIXME: Implement this
 
+        else:  # both files
+            print_comparison(args.dicom_path, args.raw_path)
 
     elif args.dicom_path:  # only dicom
         print_dicom_metadata(args.dicom_path)
@@ -283,32 +254,3 @@ def print_comparison(dicom_filename, raw_filename):
 
     else:  # no paths given
         parser.print_help()
-
-
-
-def run_from_cli():
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('targets', nargs='*')
-    parser.add_argument('-r', '--raw', help='Access meta-data of RAW files', action='store_true')
-    parser.add_argument('-v', '--verbose', help='Verbose-mode on', action='store_true')
-    args = parser.parse_args()
-
-    if len(args.targets) == 1:  # Single file or directory
-        if args.r:  # if raw
-            print_raw_metadata(args.targets[0])
-        else:  # if dicom
-            print_dicom_metadata(args.targets[0])
-
-    elif len(args.targets) == 2:  # Two files (this branch is probably now broken)
-
-        if os.path.isdir(args.targets[0]) and os.path.isdir(args.targets[1]):  # both dirs
-            matches = match_directories(args.targets[0], args.targets[1], verbose=args.v)
-            print_matching_files(matches)
-
-        elif os.path.isdir(args.targets[1]):
-            for raw_file in os.listdir(args.targets[1]):
-                print_comparison(args.targets[0], os.path.join(args.targets[1], raw_file))
-
-        else:  # both inputs are files
-            print_comparison(args.targets[0], args.targets[1])
