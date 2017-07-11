@@ -44,9 +44,6 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
             dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
             dicom_time = _get_dicom_timestamp(dicom_file)
 
-            logger.debug(dicom_time)
-            logger.debug(raw_time)
-
             time_diff = max([dicom_time, raw_time]) - min([dicom_time, raw_time])
             if time_diff.total_seconds() < 2.0:
                 matches.append(dicom_filename)
@@ -79,7 +76,7 @@ def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TO
                     matches.append(raw_filename)
 
             except (ValueError, IsADirectoryError) as error:
-                logger.error('Could not open {}'.format(raw_filename))
+                logger.error('Could not open {} [{}]'.format(raw_filename, error))
 
     return matches
 
@@ -96,7 +93,7 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
             matches[raw_filename] = _find_matching_files_raw_to_dicom(raw_file, dicom_dir)
 
         except (ValueError, IsADirectoryError) as error:
-            logger.error('Could not open {}'.format(raw_filename))
+            logger.error('Could not open {} [{}]'.format(raw_filename, error))
 
     return matches
 
@@ -235,13 +232,17 @@ def print_comparison(dicom_filename, raw_filename):
 
 def run_from_cli():
 
-    # loglevel(100)
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
     parser.add_argument('-r', '--raw-path', help='Path to RAW file or directory')
     parser.add_argument('-v', '--verbose', help='Verbose-mode on', action='store_true')
 
     args = parser.parse_args()
+
+    if args.verbose:
+        loglevel(10)
+    else:
+        loglevel(100)
 
     if args.dicom_path and args.raw_path:  # two paths
 
