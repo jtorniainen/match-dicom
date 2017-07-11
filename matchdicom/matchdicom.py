@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-import dicom
-import os
-import tifffile
-import blessings
-import datetime
-import argparse
-from logzero import logger, loglevel
-
 # Maps DICOM files to RAW files using timestamps
 # Usage: ./map-dicom DICOM RAW
 #
@@ -16,11 +8,27 @@ from logzero import logger, loglevel
 # jtorniainen
 # UEF 2017, MIT License
 
+import dicom
+import os
+import tifffile
+import blessings
+import datetime
+import argparse
+from logzero import logger, loglevel
+
 
 term = blessings.Terminal()
 
 
-def _find_matching_files2(raw_file, dicom_dir):
+def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
+    """ Finds the DICOM file matching the given RAW file.
+
+    Args:
+        raw_file <TIFF>: opened RAW-file
+        dicom_dir <str>: path to DICOM-files
+    Returns:
+        matches <list>: list of DICOM-files that match RAW-file
+    """
 
     raw_time = _get_raw_timestamp(raw_file)
 
@@ -41,44 +49,29 @@ def _find_matching_files2(raw_file, dicom_dir):
         except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
             logger.error('{} -> {}'.format(dicom_file, error))
 
-
     return matches
 
 
-def _find_matching_files(dicom_file, raw_dir, verbose=False):
+def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):
     """ Searches a directory for matching RAW files """
 
-    time_dicom = _get_dicom_timestamp(dicom_file)
-
-    if not time_dicom:
-        return None
+    dicom_time = _get_dicom_timestamp(dicom_file)
 
     matches = []
     for raw_filename in os.listdir(raw_dir):
             try:
                 raw_file = open_raw(os.path.join(raw_dir, raw_filename))
-                time_raw = _get_raw_timestamp(raw_file)
+                raw_time = _get_raw_timestamp(raw_file)
 
-                time_diff = max([time_dicom, time_raw]) - min([time_dicom, time_raw])
+                time_diff = max([dicom_time, raw_time]) - min([dicom_time, raw_time])
 
                 if time_diff.total_seconds() < 2.0:
-                    if verbose:
-                        msg = term.bold_black_on_green('Found {} is a match (Δ={})'.format(raw_filename, str(time_diff)))
-                        print(msg)
+                    logger.info('Match found')
                     matches.append(raw_filename)
-                else:
-                    if verbose:
-                        print(term.red('!:') + '{} is not a match (Δ={})'.format(raw_filename, str(time_diff)))
 
-            except ValueError:
-                if verbose:
-                    print(term.red_bold('Warning: ') + '{} is not a TIFF file (skipped)'.format(raw_filename))
-                continue
+            except (ValueError, IsADirectoryError) as error:
+                logger.error('{} -> {}'.format(raw_filename, error))
 
-            except IsADirectoryError:
-                if verbose:
-                    print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(raw_filename))
-                continue
     return matches
 
 
@@ -92,14 +85,10 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
                 print('\t{}:'.format(dicom_filename))
             dicom_file = open_dicom(os.path.join(dicom_dir, dicom_filename))
             matches[dicom_filename] = _find_matching_files(dicom_file, raw_dir, verbose)
-        except dicom.errors.InvalidDicomError:
-            if verbose:
-                print(term.red_bold('WARNING: ') + '{} is not a DICOM-file!'.format(dicom_filename).rjust(20))
-            continue
-        except IsADirectoryError:
-            if verbose:
-                print(term.red_bold('Warning: ') + '{} is a directory file (skipped)'.format(dicom_filename))
-            continue
+
+        except (dicom.errors.InvalidDicomError, IsADirectoryError) as error:
+            logger.error('{} -> {}'.format(dicom_filename, error))
+
     return matches
 
 
@@ -265,18 +254,50 @@ def print_comparison(dicom_filename, raw_filename):
 
 # MAIN--------------------------------------------------
 
+
+# def run_from_cli2():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
+    parser.add_argument('-r', '--raw-path', help='Path to RAW file or directory')
+    parser.add_argument('-v', '--verbose', help='Verbose-mode on', action='store_true')
+
+    args = parser.parse_args()
+
+    if args.dicom_path and args.raw_path:  # two paths
+
+        if os.path.isdir(args.dicom_path) and os.path.isdir(args.raw_path):  # both paths directories
+            matches = match_directories(args.dicom_path, args.raw_path)
+            print_matching_files(matches)
+
+        elif os.path.isdir(args.dicom_path):
+        elif os.path.isdir(args.raw_path):
+        else:  # both files
+
+
+    elif args.dicom_path:  # only dicom
+        print_dicom_metadata(args.dicom_path)
+
+    elif args.raw_path:  # only raw
+        print_raw_metadata(args.raw_path)
+
+    else:  # no paths given
+        parser.print_help()
+
+
+
 def run_from_cli():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', nargs='*')
-    parser.add_argument('-r', help='Access meta-data of RAW files', action='store_true')
-    parser.add_argument('-v', help='Verbose-mode on', action='store_true')
+    parser.add_argument('-r', '--raw', help='Access meta-data of RAW files', action='store_true')
+    parser.add_argument('-v', '--verbose', help='Verbose-mode on', action='store_true')
     args = parser.parse_args()
 
     if len(args.targets) == 1:  # Single file or directory
-        if args.r:
+        if args.r:  # if raw
             print_raw_metadata(args.targets[0])
-        else:
+        else:  # if dicom
             print_dicom_metadata(args.targets[0])
 
     elif len(args.targets) == 2:  # Two files (this branch is probably now broken)
