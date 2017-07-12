@@ -55,8 +55,15 @@ def _find_matching_files_raw_to_dicom(raw_file, dicom_dir):
     return matches
 
 
-def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TODO: Find out if this is even needed...
-    """ Searches a directory for matching RAW files """
+def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):
+    """ Finds the RAW file matching the given DICOM file.
+
+    Args:
+        raw_file <TIFF>: opened RAW-file
+        dicom_dir <str>: path to DICOM-files
+    Returns:
+        matches <list>: list of DICOM-files that match RAW-file
+    """
 
     dicom_time = _get_dicom_timestamp(dicom_file)
 
@@ -82,7 +89,16 @@ def _find_matching_files_dicom_to_raw(dicom_file, raw_dir, verbose=False):  # TO
 
 
 def match_directories(dicom_dir, raw_dir, verbose=False):
-    """ Finds matching files in two directories (one DICOM and one RAW) """
+    """ Finds matching all matching files in two directories.
+
+    Args:
+        dicom_dir <str>: path to DICOM directory
+        raw_dir <str>: path to RAW directory
+
+    Returns:
+        matches <dict>: A dict containing all matching files (keys are RAW files, values list of DICOM files)
+    """
+
     matches = {}
 
     raw_filenames = os.listdir(raw_dir)
@@ -99,7 +115,16 @@ def match_directories(dicom_dir, raw_dir, verbose=False):
 
 
 def _get_dicom_comment(dicom_file):
-    """ Returns the contents of the comment field of a dicom file """
+    """ Returns the contents of the comment field of a DICOM file.
+
+    Args:
+        dicom_file <dicom.dataset>: Opened DICOM file
+
+    Returns:
+        image_comment <str>: DICOM comment
+
+    """
+
     if hasattr(dicom_file, 'ImageComments'):
         return dicom_file.ImageComments
     else:
@@ -116,13 +141,29 @@ def open_raw(path):
 
 
 def _get_raw_timestamp(raw_file):
-    """ Returns the timestamp of the raw file """
+    """ Returns the time stamp of the RAW file
+
+    Args:
+        raw_file <tifffile.TiffFile>: RAW file handler
+
+    Returns:
+        timestamp <datetime.datetime> Creation time of the RAW file
+    """
+
     timestamp_str = raw_file.pages[0].tags['datetime'].value.decode('ascii')
     return datetime.datetime.strptime(timestamp_str, '%Y:%m:%d %H:%M:%S')
 
 
 def _get_dicom_timestamp(dicom_file):
-    """ Gets the timestamp from a DICOM file """
+    """ Returns the time stamp of the DICOM file
+
+    Args:
+        raw_file <dicom.dataset>: RAW file handler
+
+    Returns:
+        timestamp <datetime.datetime> Creation time of the DICOM file
+    """
+
     if hasattr(dicom_file, 'AcquisitionDate'):
         timestamp_str = '{}:{}:{} {}:{}:{}'.format(dicom_file.AcquisitionDate[0:4],
                                                    dicom_file.AcquisitionDate[4:6],
@@ -138,7 +179,13 @@ def _get_dicom_timestamp(dicom_file):
 
 
 def _print_metadata(filename, comment, timestamp):
-    """ Pretty print the metadata of a DICOM/RAW file """
+    """ Pretty print the metadata of a DICOM/RAW file.
+
+    Args:
+        filename <str>: Name of the file
+        comment <str>: Contents of the comment field
+        timestamp <datetime.datetime>: Creation timestamp
+    """
 
     if not comment:
         comment = '<None>'
@@ -152,7 +199,11 @@ def _print_metadata(filename, comment, timestamp):
 
 
 def print_dicom_metadata(path):
-    """ Reads comments and timestamps from all DICOM files found in path """
+    """ Reads comments and timestamps from all DICOM files found in given path.
+
+    Args:
+        path <str>: Path to target directory
+    """
 
     if os.path.isdir(path):
         filelist = [os.path.join(path, filename) for filename in os.listdir(path)]
@@ -172,7 +223,11 @@ def print_dicom_metadata(path):
 
 
 def print_raw_metadata(path):
-    """ Reads comments and timestamps from all RAW files found in path """
+    """ Reads comments and timestamps from all RAW files found in given path.
+
+    Args:
+        path <str>: Path to target directory
+    """
 
     if os.path.isdir(path):
         filelist = [os.path.join(path, filename) for filename in os.listdir(path)]
@@ -191,7 +246,11 @@ def print_raw_metadata(path):
 
 
 def print_matching_files(matches):
-    """ Pretty print matches-dict """
+    """ Pretty print the contents of matches-dict.
+
+    Args:
+        matches <dict> Dictionary containing the matching files.
+    """
     for key, value in matches.items():
         if value:
             print(key.ljust(35) + ' ↔ ' + term.green(str(value).strip('[').strip(']')))
@@ -200,7 +259,12 @@ def print_matching_files(matches):
 
 
 def print_comparison(dicom_filename, raw_filename):
-    """ Print the comparison of meta data from a DICOM-RAW pair """
+    """ Print the comparison of meta data of a given DICOM-RAW pair.
+
+    Args:
+        dicom_filename <str>: path to DICOM file
+        raw_filename <str>: path to RAW file
+    """
 
     try:
         dicom_data = open_dicom(dicom_filename)
