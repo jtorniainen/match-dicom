@@ -321,7 +321,7 @@ def run_from_cli():
         elif os.path.isdir(args.dicom_path):
             raw_file = open_raw(args.raw_path)
             matches = _find_matching_files_raw_to_dicom(raw_file, args.dicom_path)
-            print_matching_files(matches)
+            print_matching_files({args.raw_path: matches})
 
         elif os.path.isdir(args.raw_path):
             dicom_file = open_dicom(args.dicom_path)
