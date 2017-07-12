@@ -231,6 +231,9 @@ def print_comparison(dicom_filename, raw_filename):
 
 
 def run_from_cli():
+    """ Command line operation of the module. Can print out metadata of OCT files in a directory or compare files and
+        directories. See 'match-dicom --help' for usage.
+    """
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dicom-path', help='Path to DICOM file or directory')
@@ -252,9 +255,14 @@ def run_from_cli():
             print_matching_files(matches)
 
         elif os.path.isdir(args.dicom_path):
-            pass  # FIXME: Implement this
+            raw_file = open_raw(args.raw_path)
+            matches = _find_matching_files_raw_to_dicom(raw_file, args.path_dicom)
+            print_matching_files(matches)
+
         elif os.path.isdir(args.raw_path):
-            pass  # FIXME: Implement this
+            dicom_file = open_dicom(args.dicom_path)
+            matches = _find_matching_files_dicom_to_raw(dicom_file, args.path_raw)
+            print_matching_files(matches)
 
         else:  # both files
             print_comparison(args.dicom_path, args.raw_path)
